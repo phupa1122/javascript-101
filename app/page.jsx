@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Card, CardBody, CardHeader, CardFooter, Typography, Button, IconButton, List, ListItem, Dialog, DialogHeader, DialogBody, DialogFooter } from "@material-tailwind/react";
-
+import Confetti from 'react-confetti-boom';
 const GachaMachine = () => {
   const initialProducts = [
     {
@@ -56,8 +56,9 @@ const GachaMachine = () => {
   ];
 
   const [products, setProducts] = useState(initialProducts);
-  const [availableProducts, setAvailableProducts] = useState([])
+  const [availableProducts, setAvailableProducts] = useState([handleClickAddCredit.map])
   const [message, setMessage] = useState('Please add your credit and click "PLAY GACHA"');
+  const [message2, setMessage2] = useState([]);
   const [costPerRound, setCostPerRound] = useState(550);
   const [credit, setCredit] = useState(0);
   const [lastPrize, setLastPrize] = useState(null);
@@ -70,16 +71,16 @@ const GachaMachine = () => {
     updateAvailableProducts();
   }, [products]);
 
-  function updateAvailableProducts () {
+  function updateAvailableProducts() {
     const available = products.filter(product => product.stock > 0);
     setAvailableProducts(available);
   }
 
   function updateProductStock(productId) {
-    setProducts(prevProducts => 
-      prevProducts.map(product => 
-        product.id === productId 
-          ? { ...product, stock: product.stock - 1 } 
+    setProducts(prevProducts =>
+      prevProducts.map(product =>
+        product.id === productId
+          ? { ...product, stock: product.stock - 1 }
           : product
       )
     );
@@ -87,7 +88,11 @@ const GachaMachine = () => {
 
   function handleClickAddCredit(amount) {
     setCredit((prevCredit) => prevCredit + amount);
+    setMessage2((message2) => { const message3 = [ "Add amount " + amount , ...message2,];
+    return message3.slice(0, 5);
+  });
   }
+  
 
   function handleClickPlayGacha() {
     if (credit < costPerRound) {
@@ -95,6 +100,7 @@ const GachaMachine = () => {
       setMessage("You don't have enough credit to play!");
       return;
     }
+
 
     // minus credit
     setCredit((prevCredit) => prevCredit - costPerRound);
@@ -120,6 +126,9 @@ const GachaMachine = () => {
             <Typography>You won: {randomProduct.name}</Typography>
           </>
         );
+        setMessage2((message2) => { const message3 = [ " get " + randomProduct.name , ...message2,];
+          return message3.slice(0, 5);
+        });
         updateProductStock(randomProduct.id);
         setIsPlaying(false);
       }
@@ -160,9 +169,9 @@ const GachaMachine = () => {
                         <Typography variant="h4" color="red">
                           ฿{product?.price}
                         </Typography>
-                        <Button 
-                          className="mt-2 text-xs" 
-                          fullWidth 
+                        <Button
+                          className="mt-2 text-xs"
+                          fullWidth
                           color={product.stock > 0 ? "green" : "red"}
                           disabled={!product.stock}
                         >
@@ -193,7 +202,7 @@ const GachaMachine = () => {
               </CardBody>
             </Card>
 
-             {/* Add Credit */}
+            {/* Add Credit */}
             <Card className="mb-4">
               <CardHeader shadow={false} floated={false}>
                 <Typography variant="h4">Add Credit</Typography>
@@ -228,12 +237,59 @@ const GachaMachine = () => {
                 <Typography className="text-center" as="div">{message}</Typography>
               </CardBody>
             </Card>
+
+            {/* Message2 */}
+            <Card className="mb-4">
+              <CardHeader shadow={false} floated={false}>
+                <Typography variant="h4">History</Typography>
+              </CardHeader>
+              <CardBody>
+                <List>
+                  {message2.map((event, index) => (
+                    <ListItem key={index}>
+                      <Typography>{event}</Typography>
+                    </ListItem>
+                  ))}
+                </List>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </div>
 
       {/* Prize Won Modal */}
+
       <Dialog open={prizeModalOpen}>
+        {prizeModalOpen && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 9999,
+              pointerEvents: 'none',
+            }}
+          >
+            <Confetti mode="fall" particleCount={50} colors={['#ff577f', '#ff884b']} />
+          </div>
+        )}
+        {prizeModalOpen && (
+          <div
+            style={{
+              position: 'absolute',
+              top: "0%",
+              left: "-70%",
+              width: '100%',
+              height: '100%',
+              zIndex: 9999,
+              pointerEvents: 'none',
+            }}
+          >
+            <Confetti mode="boom" particleCount={50} colors={['#ff577f', '#ff884b']} />
+          </div>
+        )}
         <DialogHeader>Congratulations!</DialogHeader>
         <DialogBody divider>
           {lastPrize && (
@@ -258,7 +314,9 @@ const GachaMachine = () => {
             Claim Prize
           </Button>
         </DialogFooter>
+
       </Dialog>
+
 
       {/* Credit Not Enough Modal */}
       <Dialog open={creditNotEnoughModalOpen}>
@@ -278,6 +336,7 @@ const GachaMachine = () => {
             <span>Add Credit</span>
           </Button>
         </DialogFooter>
+
       </Dialog>
 
     </div>
